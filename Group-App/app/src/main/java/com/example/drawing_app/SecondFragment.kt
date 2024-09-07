@@ -17,10 +17,6 @@ class SecondFragment : Fragment() {
     private val drawingViewModel: DrawingViewModel by activityViewModels()
 
 
-    companion object {
-        var savedBitmap: Bitmap? = null
-    }
-
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
         savedInstanceState: Bundle?
@@ -48,7 +44,7 @@ class SecondFragment : Fragment() {
 
     override fun onPause() {
         super.onPause()
-        savedBitmap = drawingView.getBitMap()
+        drawingViewModel.setBitmap(drawingView.getBitMap()!!)
         Log.d("SecondFragment", "Saving drawing state in onPause")
     }
 
