@@ -1,16 +1,24 @@
 <?xml version="1.0" encoding="utf-8"?>
 <FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:gravity="center"
     tools:context=".FirstFragment">
 
+    <TextView
+        android:id="@+id/welcome"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:text="Welcome to the best drawing APP!!" />
 
     <Button
         android:id="@+id/goToSecond"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="Go to Drawing" />
+        app:layout_constraintTop_toBottomOf="@+id/welcome"
+        app:layout_constraintStart_toStartOf="parent"
+        android:text="To Canvas" />
 
 </FrameLayout>

@@ -18,6 +18,10 @@ class DrawingView(context: Context, attrs: AttributeSet) : View(context, attrs) 
     }
     private var bitmap: Bitmap? = null
     private var canvas: Canvas? = null
+    enum class PenShape {
+        CIRCLE, SQUARE //still will add the other shapes
+    }
+    private var currentPenShape = PenShape.CIRCLE
 
     init {
         setBackgroundColor(Color.LTGRAY)
@@ -37,7 +41,14 @@ class DrawingView(context: Context, attrs: AttributeSet) : View(context, attrs) 
     }
 
     fun addDrawing(x: Float, y: Float) {
-        canvas?.drawCircle(x, y, 20f, paint)
+        when (currentPenShape) {
+            PenShape.CIRCLE -> canvas?.drawCircle(x, y, paint.strokeWidth, paint)
+            PenShape.SQUARE -> {
+                val halfSize = paint.strokeWidth / 2
+                canvas?.drawRect(x - halfSize, y - halfSize, x + halfSize, y + halfSize, paint)
+            }
+        }
+        //canvas?.drawCircle(x, y, 20f, paint)
         invalidate()
     }
 
@@ -49,5 +60,15 @@ class DrawingView(context: Context, attrs: AttributeSet) : View(context, attrs) 
         bitmap = savedBitmap.copy(Bitmap.Config.ARGB_8888, true)
         canvas = Canvas(bitmap!!)
         invalidate()
+    }
+    fun setPenColor(color: Int) {
+        paint.color = color
+    }
+    fun setPenSize(size: Float) {
+        paint.strokeWidth = size
+    }
+
+    fun setPenShape(shape: PenShape) {
+        currentPenShape = shape
     }
 }//end of DrawingView class implementation
