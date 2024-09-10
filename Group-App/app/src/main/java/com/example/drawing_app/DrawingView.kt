@@ -1,11 +1,9 @@
 package com.example.drawing_app
 
 import android.content.Context
-import android.graphics.Bitmap
-import android.graphics.Canvas
-import android.graphics.Color
-import android.graphics.Paint
+import android.graphics.*
 import android.util.AttributeSet
+import android.view.MotionEvent
 import android.view.View
 
 class DrawingView(context: Context, attrs: AttributeSet) : View(context, attrs) {
@@ -16,11 +14,19 @@ class DrawingView(context: Context, attrs: AttributeSet) : View(context, attrs) 
         strokeWidth = 5f
         isAntiAlias = true
     }
+
     private var bitmap: Bitmap? = null
     private var canvas: Canvas? = null
+
+    private var currentX = 0f
+    private var currentY = 0f
+
+    private var isEraserEnabled = false
+
     enum class PenShape {
-        CIRCLE, SQUARE //still will add the other shapes
+        CIRCLE, SQUARE, TRIANGLE, OVAL
     }
+
     private var currentPenShape = PenShape.CIRCLE
 
     init {
@@ -40,6 +46,18 @@ class DrawingView(context: Context, attrs: AttributeSet) : View(context, attrs) 
         }
     }
 
+    override fun onTouchEvent(event: MotionEvent): Boolean {
+        currentX = event.x
+        currentY = event.y
+
+        when (event.action) {
+            MotionEvent.ACTION_DOWN, MotionEvent.ACTION_MOVE -> {
+                addDrawing(currentX, currentY)
+            }
+        }
+        return true
+    }
+
     fun addDrawing(x: Float, y: Float) {
         when (currentPenShape) {
             PenShape.CIRCLE -> canvas?.drawCircle(x, y, paint.strokeWidth, paint)
@@ -47,8 +65,23 @@ class DrawingView(context: Context, attrs: AttributeSet) : View(context, attrs) 
                 val halfSize = paint.strokeWidth / 2
                 canvas?.drawRect(x - halfSize, y - halfSize, x + halfSize, y + halfSize, paint)
             }
+            PenShape.TRIANGLE -> {
+                val path = Path()
+                val halfSize = paint.strokeWidth
+                path.moveTo(x, y - halfSize)
+                path.lineTo(x - halfSize, y + halfSize)
+                path.lineTo(x + halfSize, y + halfSize)
+                path.close()
+                canvas?.drawPath(path, paint)
+            }
+            PenShape.OVAL -> canvas?.drawOval(
+                x - paint.strokeWidth,
+                y - paint.strokeWidth / 2,
+                x + paint.strokeWidth,
+                y + paint.strokeWidth / 2,
+                paint
+            )
         }
-        //canvas?.drawCircle(x, y, 20f, paint)
         invalidate()
     }
 
@@ -61,9 +94,12 @@ class DrawingView(context: Context, attrs: AttributeSet) : View(context, attrs) 
         canvas = Canvas(bitmap!!)
         invalidate()
     }
+
     fun setPenColor(color: Int) {
         paint.color = color
+        isEraserEnabled = false
     }
+
     fun setPenSize(size: Float) {
         paint.strokeWidth = size
     }
@@ -71,4 +107,10 @@ class DrawingView(context: Context, attrs: AttributeSet) : View(context, attrs) 
     fun setPenShape(shape: PenShape) {
         currentPenShape = shape
     }
-}//end of DrawingView class implementation
+
+    fun enableEraser() {
+        paint.color = Color.LTGRAY //background color
+        isEraserEnabled = true
+        paint.strokeWidth = 20f
+    }
+}
