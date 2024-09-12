@@ -7,12 +7,13 @@
     tools:context=".SecondFragment">
 
     <!-- DrawingView -->
+
+    <!-- Color Picker -->
     <com.example.drawing_app.DrawingView
         android:id="@+id/drawingView"
         android:layout_width="match_parent"
-        android:layout_height="match_parent"/>
+        android:layout_height="match_parent" />
 
-    <!-- Color Picker -->
     <com.flask.colorpicker.ColorPickerView
         android:id="@+id/colorPickerView"
         android:layout_width="match_parent"

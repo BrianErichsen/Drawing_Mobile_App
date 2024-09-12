@@ -32,7 +32,6 @@
         android:orientation="horizontal"
         android:gravity="center_horizontal"
         android:layout_gravity="bottom"
-        android:padding="16dp"
         android:weightSum="4">
 
         <!-- pen shape-->
@@ -56,7 +55,7 @@
         <!--pen dize -->
         <SeekBar
             android:id="@+id/size_seekbar"
-            android:layout_width="0dp"
+            android:layout_width="100dp"
             android:layout_height="wrap_content"
             android:max="100"
             android:progress="5"
