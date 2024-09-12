@@ -9,10 +9,13 @@ import android.view.ViewGroup
 import android.widget.*
 import androidx.appcompat.app.AlertDialog
 import androidx.fragment.app.Fragment
+import androidx.fragment.app.activityViewModels
+import androidx.lifecycle.Observer
 
 class FirstFragment : Fragment() {
 
     private lateinit var drawingView: DrawingView
+    private val drawingViewModel: DrawingViewModel by activityViewModels()
 
     // creates its view hierarchy and inflates the layout
     override fun onCreateView(
@@ -20,9 +23,14 @@ class FirstFragment : Fragment() {
         savedInstanceState: Bundle?
     ): View? {
         val view = inflater.inflate(R.layout.fragment_first, container, false)
-
         // DrawingView
         drawingView = view.findViewById(R.id.drawing_view)
+        drawingView.observeViewModel(drawingViewModel, viewLifecycleOwner)
+        drawingViewModel.bitmap.observe(viewLifecycleOwner, Observer { bitmap ->
+            bitmap?.let {
+                drawingView.setBitMap(it)
+            }
+        })
 
         // pinner
         val shapeSpinner: Spinner = view.findViewById(R.id.shape_spinner)
@@ -35,7 +43,7 @@ class FirstFragment : Fragment() {
                     3 -> DrawingView.PenShape.OVAL
                     else -> DrawingView.PenShape.CIRCLE
                 }
-                drawingView.setPenShape(shape)
+                drawingViewModel.setPenShape(shape)
             }
 
             override fun onNothingSelected(parent: AdapterView<*>?) {}
@@ -52,7 +60,7 @@ class FirstFragment : Fragment() {
         sizeSeekBar.setOnSeekBarChangeListener(object : SeekBar.OnSeekBarChangeListener {
             override fun onProgressChanged(seekBar: SeekBar?, progress: Int, fromUser: Boolean) {
                 val penSize = progress.toFloat()
-                drawingView.setPenSize(penSize)
+                drawingViewModel.setPenSize(penSize)
             }
 
             override fun onStartTrackingTouch(seekBar: SeekBar?) {}
@@ -76,7 +84,7 @@ class FirstFragment : Fragment() {
         val builder = AlertDialog.Builder(requireContext())
         builder.setTitle("Choose Pen Color")
         builder.setItems(colors) { _, which ->
-            drawingView.setPenColor(colorValues[which])
+            drawingViewModel.setPenColor(colorValues[which])
         }
         builder.show()
     }

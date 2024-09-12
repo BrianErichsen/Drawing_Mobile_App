@@ -5,6 +5,8 @@ import android.graphics.*
 import android.util.AttributeSet
 import android.view.MotionEvent
 import android.view.View
+import androidx.lifecycle.LifecycleOwner
+import androidx.lifecycle.Observer
 
 class DrawingView(context: Context, attrs: AttributeSet) : View(context, attrs) {
 
@@ -113,4 +115,21 @@ class DrawingView(context: Context, attrs: AttributeSet) : View(context, attrs) 
         isEraserEnabled = true
         paint.strokeWidth = 20f
     }
+
+    fun observeViewModel(viewModel: DrawingViewModel, lifecycleOwner: LifecycleOwner) {
+        viewModel.penColor.observe(lifecycleOwner, Observer { color ->
+            setPenColor(color)
+        })
+        viewModel.penSize.observe(lifecycleOwner, Observer { size ->
+            setPenSize(size)
+        })
+        viewModel.penShape.observe(lifecycleOwner, Observer { shape ->
+            setPenShape(shape)
+        })
+        viewModel.bitmap.observe(lifecycleOwner, Observer { bitmap ->
+            bitmap?.let {
+                setBitMap(it)
+            }
+        })
+    }//end of observeVM method
 }
