@@ -6,69 +6,26 @@
     android:layout_height="match_parent"
     tools:context=".FirstFragment">
 
-    <!-- welcome msg-->
-    <TextView
-        android:id="@+id/welcome"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:text="@string/welcome_message"
-        android:gravity="center"
-        android:layout_marginBottom="16dp"/>
-
-    <!-- DrawingView -->
-    <com.example.drawing_app.DrawingView
-        android:id="@+id/drawing_view"
-        android:layout_width="match_parent"
-        android:layout_height="400dp"
-        android:background="@android:color/darker_gray"
-        android:layout_gravity="center"
-        android:layout_marginBottom="16dp"/>
-
-    <!-- Control Panel: Shape, Color, Size, Eraser -->
     <LinearLayout
         android:id="@+id/button_panel"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:orientation="horizontal"
-        android:gravity="center_horizontal"
-        android:layout_gravity="bottom"
-        android:weightSum="4">
-
-        <!-- pen shape-->
-        <Spinner
-            android:id="@+id/shape_spinner"
-            android:layout_width="wrap_content"
-            android:layout_height="48dp"
-            android:entries="@array/pen_shapes"
-            android:layout_weight="1"
-            android:padding="8dp"/>
-
-        <!-- 选择颜色按钮 -->
+        android:orientation="vertical"
+        android:gravity="center_horizontal">
+        <!-- welcome msg-->
+        <TextView
+            android:id="@+id/welcome"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="@string/welcome_message"
+            android:gravity="center"
+            android:layout_marginBottom="16dp"/>
         <Button
-            android:id="@+id/color_button"
+            android:id="@+id/goToSecond"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:minWidth="100dp"
-            android:text="Choose Color"
-            android:layout_weight="1"/>
+            android:text="Draw"/>
 
-        <!--pen dize -->
-        <SeekBar
-            android:id="@+id/size_seekbar"
-            android:layout_width="100dp"
-            android:layout_height="wrap_content"
-            android:max="100"
-            android:progress="5"
-            android:layout_weight="2"/>
-
-        <!-- eraser -->
-        <Button
-            android:id="@+id/eraser_button"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:minWidth="100dp"
-            android:text="@string/eraser"
-            android:layout_weight="1"/>
     </LinearLayout>
 
 </FrameLayout>

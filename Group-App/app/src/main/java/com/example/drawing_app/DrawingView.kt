@@ -25,6 +25,7 @@ class DrawingView(context: Context, attrs: AttributeSet) : View(context, attrs) 
 
     private var isEraserEnabled = false
 
+    // enum for different shapes
     enum class PenShape {
         CIRCLE, SQUARE, TRIANGLE, OVAL
     }
