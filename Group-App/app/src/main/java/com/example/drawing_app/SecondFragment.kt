@@ -70,12 +70,10 @@ class SecondFragment : Fragment() {
             override fun onStopTrackingTouch(seekBar: SeekBar?) {}
         })
 
-
         val eraserButton: Button = view.findViewById(R.id.eraser_button)
         eraserButton.setOnClickListener {
             drawingView.enableEraser()
         }
-
         return view
     }
 
