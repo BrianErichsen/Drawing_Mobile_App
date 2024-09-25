@@ -11,6 +11,7 @@ import androidx.appcompat.app.AlertDialog
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.activityViewModels
 import androidx.lifecycle.Observer
+import androidx.navigation.fragment.findNavController
 
 class FirstFragment : Fragment() {
     // creates its view hierarchy and inflates the layout
@@ -22,10 +23,7 @@ class FirstFragment : Fragment() {
         val but: Button = view.findViewById(R.id.goToSecond)
         //sets listener for button to go to second fragment when clicked
         but.setOnClickListener {
-            parentFragmentManager.beginTransaction()
-                .replace(R.id.fragment_container, SecondFragment())
-                .addToBackStack(null)
-                .commit()
+            findNavController().navigate(R.id.action_firstFragment_to_secondFragment)
         }
         return view
     }
