@@ -7,18 +7,39 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.asImageBitmap
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.material.Button
+
 import android.graphics.Bitmap
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.padding
+import androidx.compose.material.Text
+import androidx.compose.ui.unit.dp
 
 @Composable
-fun drawingList(drawings: List<Bitmap>) {
-    LazyColumn(modifier = Modifier.fillMaxSize()) {
-        items(drawings) { drawing ->
-            Image(
-                bitmap = drawing.asImageBitmap(),
-                contentDescription = "Drawing",
-                contentScale = ContentScale.Fit,
-                modifier = Modifier.fillMaxSize()
-            )
+fun drawingListScreen(viewModel: DrawingViewModel, onNavigateToDraw: () -> Unit) {
+    Column(modifier = Modifier.fillMaxSize()) {
+        LazyColumn(modifier = Modifier.weight(1f)) {
+            items(viewModel.drawingList.value ?: listOf()) { drawing ->
+                Image(
+                    bitmap = drawing.asImageBitmap(),
+                    contentDescription = "Drawing",
+                    contentScale = ContentScale.Fit,
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .height(150.dp)
+                )
+            }
+        }
+        // Button to navigate to the drawing screen
+        Button(
+            onClick = onNavigateToDraw,
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(16.dp)
+        ) {
+            Text("Create New Drawing")
         }
     }
 }

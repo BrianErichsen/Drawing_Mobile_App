@@ -24,25 +24,14 @@ class FirstFragment : Fragment() {
         inflater: LayoutInflater, container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View? {
-        val view = inflater.inflate(R.layout.fragment_first, container, false)
-
-        // Set up the button for navigating to the second fragment
-        val button: Button = view.findViewById(R.id.goToSecond)
-        button.setOnClickListener {
-            findNavController().navigate(R.id.action_firstFragment_to_secondFragment)
-        }
-
-        // Find the ComposeView and set up Jetpack Compose for displaying the drawing list
-        val composeView = view.findViewById<ComposeView>(R.id.composeView)
-
-        // Observe the drawing list from the ViewModel and update the ComposeView content when the list changes
-        drawingViewModel.drawingList.observe(viewLifecycleOwner, Observer { drawings ->
-            composeView.setContent {
-                drawingList(drawings)  // Rename function to drawingList (lowercase)
+        return ComposeView(requireContext()).apply {
+            setContent {
+                //extracts from here
+                drawingListScreen(viewModel = drawingViewModel, onNavigateToDraw = {
+                    findNavController().navigate(R.id.action_firstFragment_to_secondFragment)
+                })
             }
-        })
-
-        return view
+        }
     }
 
     override fun onDestroyView() {
