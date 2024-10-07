@@ -26,9 +26,11 @@ class SecondFragment : Fragment() {
         savedInstanceState: Bundle?
     ): View? {
         val view = inflater.inflate(R.layout.fragment_second, container, false)
+
         // DrawingView
         drawingView = view.findViewById(R.id.drawing_view)
-        drawingView.observeViewModel(drawingViewModel, viewLifecycleOwner)
+
+
         drawingViewModel.bitmap.observe(viewLifecycleOwner, Observer { bitmap ->
             bitmap?.let {
                 drawingView.setBitMap(it)
@@ -50,6 +52,15 @@ class SecondFragment : Fragment() {
             }
 
             override fun onNothingSelected(parent: AdapterView<*>?) {}
+        }
+
+        // setting up a save button to save drawing
+        val saveButton: Button = view.findViewById(R.id.save_button)
+        saveButton.setOnClickListener{
+            val bitmap = drawingView.getBitMap()
+            bitmap?.let {
+                drawingViewModel.saveDrawing(it, null)
+            }
         }
 
 
@@ -92,10 +103,14 @@ class SecondFragment : Fragment() {
 
     override fun onPause() {
         super.onPause()
-        drawingViewModel.setBitmap(drawingView.getBitMap()!!)
+        val bitmap = drawingView.getBitMap()
+        bitmap?.let {
+            drawingViewModel.setBitmap(it)
+            drawingViewModel.saveDrawing(it, null)
+        }
     }
     override fun onDestroyView() {
         super.onDestroyView()
-        Log.d("FirstFragment", "Fragment view destroyed")
+        Log.d("SecondFragment", "Fragment view destroyed")
     }
 }

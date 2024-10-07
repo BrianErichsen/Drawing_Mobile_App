@@ -24,6 +24,7 @@ class FirstFragment : Fragment() {
         inflater: LayoutInflater, container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View? {
+        drawingViewModel.loadDrawings()
         return ComposeView(requireContext()).apply {
             setContent {
                 //extracts from here

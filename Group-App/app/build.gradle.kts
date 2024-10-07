@@ -1,6 +1,8 @@
 plugins {
     id("com.android.application")
     id("org.jetbrains.kotlin.android")
+    id("com.google.devtools.ksp")
+    //id("androidx.navigation.safeargs")
 }
 
 android {
@@ -52,6 +54,11 @@ dependencies {
     implementation("androidx.compose.ui:ui-tooling-preview:1.5.0")
     implementation("androidx.lifecycle:lifecycle-viewmodel-compose:2.6.1")
     implementation("androidx.navigation:navigation-compose:2.6.0")
+
+    //Room dependencies
+    implementation ("androidx.room:room-runtime:2.6.0")
+    implementation ("androidx.room:room-ktx:2.6.0")
+    ksp ("androidx.room:room-compiler:2.6.0")
 
     // Color picker dependency
     implementation("com.github.QuadFlask:colorpicker:0.0.15")
