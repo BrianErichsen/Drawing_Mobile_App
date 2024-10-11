@@ -2,16 +2,27 @@ package com.example.drawing_app
 
 import androidx.room.Dao
 import androidx.room.Insert
+import androidx.room.OnConflictStrategy
 import androidx.room.Query
+import androidx.room.Update
+import kotlinx.coroutines.flow.Flow
 
 @Dao
 interface DrawingDao {
-    @Insert
-    suspend fun insertDrawing(drawing: DrawingEntity)
+    @Insert(onConflict = OnConflictStrategy.REPLACE)
+    fun insertDrawing(drawing: DrawingEntity)
 
-    @Query("SELECT * FROM drawings")
-    suspend fun getAllDrawings(): List<DrawingEntity>
+
 
     @Query("DELETE FROM drawings WHERE id = :id")
-    suspend fun deleteDrawingById(id: Long)
+    fun deleteDrawingById(id: Long)
+
+    @Update
+    fun update(drawing: DrawingEntity)
+
+    @Query("SELECT * FROM drawings WHERE id = :id")
+    fun getDrawingById(id: Int): DrawingEntity?
+
+    @Query("SELECT * FROM drawings ORDER BY id DESC")
+    fun getAllDrawings(): Flow<List<DrawingEntity>>
 }
