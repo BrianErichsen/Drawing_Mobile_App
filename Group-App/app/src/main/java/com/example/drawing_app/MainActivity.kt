@@ -4,10 +4,6 @@ import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
 import androidx.activity.compose.setContent
 import androidx.activity.viewModels
-import androidx.navigation.findNavController
-import androidx.navigation.fragment.NavHostFragment
-import androidx.navigation.ui.setupActionBarWithNavController
-import androidx.appcompat.widget.Toolbar
 import androidx.compose.material3.Surface
 import androidx.navigation.compose.rememberNavController
 

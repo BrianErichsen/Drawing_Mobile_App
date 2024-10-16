@@ -46,7 +46,9 @@ fun DrawingCanvas(navController: NavController, drawingId: Int?, viewModel: Draw
     var filePath by remember { mutableStateOf<String?>(null) }
     val creatingNewDrawing = drawingId == -1
 
-    // State to control if we are currently drawing
+    // pencil tool state data
+    val pencil = remember { Pencil() }
+    var showPencilOptions by remember { mutableStateOf(false) }
 
     // Load existing drawing if `drawingId` is provided
     LaunchedEffect(drawingId) {
@@ -75,6 +77,62 @@ fun DrawingCanvas(navController: NavController, drawingId: Int?, viewModel: Draw
             .fillMaxSize()
             .padding(16.dp)
     ) {
+        Button(
+            onClick = { showPencilOptions = !showPencilOptions },
+            modifier = Modifier.fillMaxWidth()
+        ) {
+            Text("Toggle Pencil Options")
+        }
+
+        if (showPencilOptions) {
+            Column (
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(16.dp)
+            ) {
+                Row {
+                    Button(
+                        onClick = { pencil.changePencilColor(Color.Black) },
+                        colors = ButtonDefaults.buttonColors(containerColor = Color.Black),
+                        modifier = Modifier.size(40.dp)
+                    ) {}
+                    Spacer(modifier = Modifier.width(8.dp))
+                    Button(
+                        onClick = { pencil.changePencilColor(Color.Red) },
+                        colors = ButtonDefaults.buttonColors(containerColor = Color.Red),
+                        modifier = Modifier.size(40.dp)
+                    ) {}
+                    Spacer(modifier = Modifier.width(8.dp))
+                    Button(
+                        onClick = { pencil.changePencilColor(Color.Blue) },
+                        colors = ButtonDefaults.buttonColors(containerColor = Color.Blue),
+                        modifier = Modifier.size(40.dp)
+                    ) {}
+                }
+                Spacer(modifier = Modifier.height(16.dp))
+
+                // Size Slider
+                Text("Pencil Size: ${pencil.size.value.toInt()}")
+                Slider(
+                    value = pencil.size.value,
+                    onValueChange = { pencil.changePencilSize(it) },
+                    valueRange = 5f..50f,
+                    modifier = Modifier.fillMaxWidth()
+                )
+
+                Spacer(modifier = Modifier.height(16.dp))
+
+                // Eraser Toggle
+                Button(
+                    onClick = { pencil.toggleEraser() },
+                    modifier = Modifier.fillMaxWidth()
+                ) {
+                    Text(if (pencil.isErasing.value) "Stop Erasing" else "Eraser")
+                }
+
+                Spacer(modifier = Modifier.height(16.dp))
+            }
+        }
         // Drawing area
         Canvas(
             modifier = Modifier
@@ -84,11 +142,11 @@ fun DrawingCanvas(navController: NavController, drawingId: Int?, viewModel: Draw
                 .pointerInput(Unit) {
                     detectDragGestures(
                         onDragStart = { offset ->
-                            currentPath.add(Point(offset.x, offset.y, Color.Black, 5f))
+                            currentPath.add(Point(offset.x, offset.y, pencil.color.value, pencil.size.value))
                         },
                         onDrag = { change, _ ->
                             val point = change.position
-                            currentPath.add(Point(point.x, point.y, Color.Black, 5f))
+                            currentPath.add(Point(point.x, point.y, pencil.color.value, pencil.size.value))
                         }
                     )
                 }
