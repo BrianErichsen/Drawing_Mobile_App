@@ -10,6 +10,9 @@ import androidx.navigation.NavController
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import java.io.IOException
+import android.content.Intent
+import androidx.core.content.FileProvider
+import android.net.Uri
 
 suspend fun saveDrawing(
     context: Context,
@@ -68,5 +71,30 @@ suspend fun saveDrawing(
             Toast.makeText(context, "Unexpected error: ${e.message}", Toast.LENGTH_SHORT).show()
         }
         e.printStackTrace()
+    }
+} // end of saveDrawing co-routine method implementation
+
+fun shareDrawing(context: Context, filePath: String) {
+    val file = File(filePath)
+
+    if (file.exists()) {
+        // Use a FileProvider to grant access to the image file
+        val uri: Uri = FileProvider.getUriForFile(
+            context,
+            "${context.packageName}.fileprovider", // Must match the authority in AndroidManifest
+            file
+        )
+
+        // Create the sharing intent
+        val shareIntent = Intent(Intent.ACTION_SEND).apply {
+            type = "image/*"
+            putExtra(Intent.EXTRA_STREAM, uri)
+            addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION)
+        }
+
+        // Launch the sharing dialog
+        context.startActivity(Intent.createChooser(shareIntent, "Share drawing via"))
+    } else {
+        Toast.makeText(context, "File not found", Toast.LENGTH_SHORT).show()
     }
 }

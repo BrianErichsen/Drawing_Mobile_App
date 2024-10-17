@@ -83,6 +83,15 @@ fun DrawingCanvas(navController: NavController, drawingId: Int?, viewModel: Draw
         ) {
             Text("Toggle Pencil Options")
         }
+        Button(
+            onClick = { if(filePath != null) {
+                shareDrawing(context, filePath!!)
+            } else {
+                Toast.makeText(context, "No drawing available to share", Toast.LENGTH_SHORT).show()
+            }
+    }) {
+            Text("Share Drawing")
+        }
 
         if (showPencilOptions) {
             Column (
@@ -132,7 +141,7 @@ fun DrawingCanvas(navController: NavController, drawingId: Int?, viewModel: Draw
 
                 Spacer(modifier = Modifier.height(16.dp))
             }
-        }
+        } // end of if show pen options UI elements
         // Drawing area
         Canvas(
             modifier = Modifier
@@ -234,5 +243,5 @@ fun DrawingCanvas(navController: NavController, drawingId: Int?, viewModel: Draw
         ) {
             Text("Save Drawing")
         }
-    }
+    } // end of column scope
 }
