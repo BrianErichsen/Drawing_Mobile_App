@@ -37,7 +37,8 @@ import kotlinx.coroutines.withContext
 data class Point(val x: Float, val y: Float, val color: Color, val size: Float)
 
 @Composable
-fun DrawingCanvas(navController: NavController, drawingId: Int?, viewModel: DrawingViewModel) {
+fun DrawingCanvas(navController: NavController, drawingId: Int?, viewModel: DrawingViewModel,
+                  onShakeCallback: (()-> Unit)-> Unit) {
     val context = LocalContext.current
     val scope = rememberCoroutineScope()
     var name by remember { mutableStateOf("") }
@@ -49,6 +50,17 @@ fun DrawingCanvas(navController: NavController, drawingId: Int?, viewModel: Draw
     // pencil tool state data
     val pencil = remember { Pencil() }
     var showPencilOptions by remember { mutableStateOf(false) }
+
+    fun increasePenSize() {
+        var currentPenSize = pencil.size.value
+        currentPenSize += 5f
+        pencil.size.value = currentPenSize
+        Toast.makeText(context, "Pen size increased to $currentPenSize", Toast.LENGTH_SHORT).show()
+    }
+
+    LaunchedEffect(Unit) {
+        onShakeCallback { increasePenSize() }
+    }
 
     // Load existing drawing if `drawingId` is provided
     LaunchedEffect(drawingId) {

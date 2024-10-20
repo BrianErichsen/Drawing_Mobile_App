@@ -11,13 +11,34 @@ class MainActivity : AppCompatActivity() {
     private val drawingViewModel: DrawingViewModel by viewModels {
         DrawingViewModelFactory((application as DrawingApplication).repository)
     }
+    private lateinit var shakeListener: ShakeListener
+    private var onShakeCallback: (() -> Unit)? = null
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+        shakeListener = ShakeListener(this) {
+            onShakeDetected()
+        }
        setContent {
            val navController = rememberNavController()
            Surface {
-               NavGraph(navController = navController, viewModel = drawingViewModel)
+               NavGraph(navController = navController, viewModel = drawingViewModel, onShakeCallback = {
+                   callback -> onShakeCallback = callback
+               })
            }
        }
     }
-}
+
+    override fun onResume() {
+        super.onResume()
+        shakeListener.start()
+    }
+    override fun onPause() {
+        super.onPause()
+        shakeListener.stop()
+    }
+
+    private fun onShakeDetected() {
+        onShakeCallback?.invoke()
+    }
+}// end of MainActivity implementation
