@@ -3,9 +3,9 @@ package com.example.drawing_app
 import android.graphics.Bitmap
 import android.graphics.BitmapFactory
 import android.graphics.Paint
+import androidx.compose.ui.graphics.Path
 //import android.graphics.Path
 import android.widget.Toast
-
 import androidx.compose.foundation.Canvas
 import android.graphics.Canvas as AndroidCanvas
 import androidx.compose.foundation.background
@@ -31,22 +31,19 @@ import java.io.File
 import androidx.compose.ui.graphics.Color
 import kotlinx.coroutines.withContext
 
-// 数据类定义绘制的点和球
+
+
+
 data class Point(val x: Float, val y: Float, val color: Color, val size: Float)
-data class Ball(var x: Float, var y: Float, val radius: Float, val color: Color)
 
 @Composable
-fun DrawingCanvas(
-    navController: NavController,
-    drawingId: Int?,
-    viewModel: DrawingViewModel,
-    onGravitySensorUpdate: (Float, Float) -> Unit // 添加重力传感器回调
-) {
+fun DrawingCanvas(navController: NavController, drawingId: Int?, viewModel: DrawingViewModel,
+                  onShakeCallback: (()-> Unit)-> Unit) {
     val context = LocalContext.current
     val scope = rememberCoroutineScope()
     var name by remember { mutableStateOf("") }
     var currentPath = remember { mutableStateListOf<Point>() }
-    var savedImageBitmap by remember { mutableStateOf<ImageBitmap?>(null) }
+    var savedImageBitmap by remember { mutableStateOf<ImageBitmap?>(null) } // For displaying the loaded image
     var filePath by remember { mutableStateOf<String?>(null) }
     val creatingNewDrawing = drawingId == -1
 
@@ -54,20 +51,6 @@ fun DrawingCanvas(
     val pencil = remember { Pencil() }
     var showPencilOptions by remember { mutableStateOf(false) }
 
-    // 定义球的位置和属性
-    val ball = remember { Ball(x = 400f, y = 400f, radius = 40f, color = Color.Blue) }
-
-    // 更新球位置函数
-    fun updateBallPosition(x: Float, y: Float) {
-        ball.x += x * 2 // 根据重力传感器数据更新位置
-        ball.y += y * 2
-        ball.x = ball.x.coerceIn(0f, 800f) // 800为画布宽度
-        ball.y = ball.y.coerceIn(0f, 800f) // 800为画布高度
-        println("Ball position updated: x = ${ball.x}, y = ${ball.y}")
-    }
-
-
-    // 增加笔的大小函数
     fun increasePenSize() {
         var currentPenSize = pencil.size.value
         currentPenSize += 5f
@@ -76,10 +59,30 @@ fun DrawingCanvas(
     }
 
     LaunchedEffect(Unit) {
-        increasePenSize()
-
+        onShakeCallback { increasePenSize() }
     }
 
+    // Load existing drawing if `drawingId` is provided
+    LaunchedEffect(drawingId) {
+        if (drawingId != null && drawingId != -1) {
+            scope.launch(Dispatchers.IO) {
+                try {
+                    val drawing = viewModel.getDrawingById(drawingId)
+                    drawing?.let {
+                        name = it.name
+                        filePath = it.filePath
+                        val file = File(it.filePath)
+                        if (file.exists()) {
+                            val loadedBitmap = BitmapFactory.decodeFile(file.path)
+                            savedImageBitmap = loadedBitmap.asImageBitmap() // Convert to ImageBitmap for display
+                        }
+                    }
+                } catch (e: Exception) {
+                    println("Error loading image: ${e.message}")
+                }
+            }
+        }
+    }
 
     Column(
         modifier = Modifier
@@ -93,17 +96,17 @@ fun DrawingCanvas(
             Text("Toggle Pencil Options")
         }
         Button(
-            onClick = { if (filePath != null) {
+            onClick = { if(filePath != null) {
                 shareDrawing(context, filePath!!)
             } else {
                 Toast.makeText(context, "No drawing available to share", Toast.LENGTH_SHORT).show()
             }
-            }) {
+    }) {
             Text("Share Drawing")
         }
 
         if (showPencilOptions) {
-            Column(
+            Column (
                 modifier = Modifier
                     .fillMaxWidth()
                     .padding(16.dp)
@@ -150,7 +153,7 @@ fun DrawingCanvas(
 
                 Spacer(modifier = Modifier.height(16.dp))
             }
-        } // end of if show pen options UI elements end of if show pen options UI elements
+        } // end of if show pen options UI elements
         // Drawing area
         Canvas(
             modifier = Modifier
@@ -182,82 +185,75 @@ fun DrawingCanvas(
                     center = Offset(point.x, point.y)
                 )
             }
-            drawCircle(
-                color = ball.color,
-                radius = ball.radius,
-                center = Offset(ball.x, ball.y)
-            )
         }
-    }
 
-    Spacer(modifier = Modifier.height(16.dp))
-
-    if (creatingNewDrawing) {
-        BasicTextField(
-            value = name,
-            onValueChange = {name = it},
-            modifier = Modifier.fillMaxWidth(),
-            decorationBox = { innerText ->
-                Box(
-                    Modifier
-                        .background(Color.Yellow)
-                        .padding(16.dp)
-                ) {
-                    if (name.isEmpty()) {
-                        Text("Please enter a name for your drawing")
-                        innerText()
-                    }
-                }
-            }
-        )
         Spacer(modifier = Modifier.height(16.dp))
-    }
 
-    // Save button
-    Button(
-        onClick = {
-            val bitmap = Bitmap.createBitmap(800, 800, Bitmap.Config.ARGB_8888)
-            val canvas = AndroidCanvas(bitmap)
-            savedImageBitmap?.let { imageBitmap ->
-                canvas.drawBitmap(imageBitmap.asAndroidBitmap(), 0f, 0f, null)
-            }
-            for (point in currentPath) {
-                canvas.drawCircle(
-                    point.x,
-                    point.y,
-                    point.size,
-                    Paint().apply {
-                        color = point.color.toArgb()
-                        style = Paint.Style.FILL
+        if (creatingNewDrawing) {
+            BasicTextField(
+                value = name,
+                onValueChange = {name = it},
+                modifier = Modifier.fillMaxWidth(),
+                decorationBox = { innerText ->
+                    Box(
+                        Modifier
+                            .background(Color.Yellow)
+                            .padding(16.dp)
+                    ) {
+                        if (name.isEmpty()) {
+                            Text("Please enter a name for your drawing")
+                            innerText()
+                        }
                     }
-                )
-            }
-
-            scope.launch(Dispatchers.IO) {
-                if (creatingNewDrawing) {
-                    filePath = File(context.filesDir, "$name.png").path
                 }
-                if (filePath != null) {
-                    saveDrawing(
-                        context = context,
-                        bitmap = bitmap,
-                        name = name.ifEmpty { "Untitled Drawing" },
-                        filePath = filePath!!,
-                        viewModel = viewModel,
-                        navController = navController,
-                        drawingId = drawingId
+            )
+            Spacer(modifier = Modifier.height(16.dp))
+        }
+
+        // Save button
+        Button(
+            onClick = {
+                val bitmap = Bitmap.createBitmap(800, 800, Bitmap.Config.ARGB_8888)
+                val canvas = AndroidCanvas(bitmap)
+                savedImageBitmap?.let { imageBitmap ->
+                    canvas.drawBitmap(imageBitmap.asAndroidBitmap(), 0f, 0f, null)
+                }
+                for (point in currentPath) {
+                    canvas.drawCircle(
+                        point.x,
+                        point.y,
+                        point.size,
+                        Paint().apply {
+                            color = point.color.toArgb()
+                            style = Paint.Style.FILL
+                        }
                     )
-                } else {
-                    withContext(Dispatchers.Main) {
-                        Toast.makeText(context, "Error: No file path!", Toast.LENGTH_LONG).show()
+                }
+
+                scope.launch(Dispatchers.IO) {
+                    if (creatingNewDrawing) {
+                        filePath = File(context.filesDir, "$name.png").path
+                    }
+                    if (filePath != null) {
+                        saveDrawing(
+                            context = context,
+                            bitmap = bitmap,
+                            name = name.ifEmpty { "Untitled Drawing" },
+                            filePath = filePath!!,
+                            viewModel = viewModel,
+                            navController = navController,
+                            drawingId = drawingId
+                        )
+                    } else {
+                        withContext(Dispatchers.Main) {
+                            Toast.makeText(context, "Error: No file path!", Toast.LENGTH_LONG).show()
+                        }
                     }
                 }
-            }
-        },
-        modifier = Modifier.fillMaxWidth()
-    ) {
-        Text("Save Drawing")
-    }
-} // end of column scope
-
-
+            },
+            modifier = Modifier.fillMaxWidth()
+        ) {
+            Text("Save Drawing")
+        }
+    } // end of column scope
+}

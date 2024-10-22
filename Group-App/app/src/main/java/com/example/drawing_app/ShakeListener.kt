@@ -7,7 +7,7 @@ import android.hardware.SensorEventListener
 import android.hardware.SensorManager
 import kotlin.math.sqrt
 
-class ShakeListener(private val context: Context, private val onShake: (Float, Float) -> Unit) : SensorEventListener {
+class ShakeListener(private val context: Context, private val onShake: () -> Unit) : SensorEventListener {
 
     private val sensorManager: SensorManager = context.getSystemService(Context.SENSOR_SERVICE) as SensorManager
     private val accelerometer: Sensor? = sensorManager.getDefaultSensor(Sensor.TYPE_ACCELEROMETER)
@@ -17,7 +17,7 @@ class ShakeListener(private val context: Context, private val onShake: (Float, F
     private var lastZ = 0f
     private var lastTime = 0L
 
-    private val shakeThreshold = 3f // Sensitivity of shake detection
+    private val shakeThreshold = 10f // Sensitivity of shake detection
 
     fun start() {
         accelerometer?.let {
@@ -37,12 +37,10 @@ class ShakeListener(private val context: Context, private val onShake: (Float, F
                 val y = event.values[1]
                 val z = event.values[2]
 
-                // 计算速度并调用 onShake 回调
                 val speed = sqrt((x - lastX) * (x - lastX) + (y - lastY) * (y - lastY) + (z - lastZ) * (z - lastZ)) / (currentTime - lastTime) * 10000
 
                 if (speed > shakeThreshold) {
-                    println("Shake detected with x: $x, y: $y") // 打印传感器的摇动值，便于调试
-                    onShake(x, y) // 将 x 和 y 传递给回调
+                    onShake() // Call the shake callback
                 }
 
                 lastX = x
