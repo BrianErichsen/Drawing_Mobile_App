@@ -32,7 +32,7 @@ class ShakeListener(private val context: Context, private val onShake: () -> Uni
     override fun onSensorChanged(event: SensorEvent?) {
         if (event?.sensor?.type == Sensor.TYPE_ACCELEROMETER) {
             val currentTime = System.currentTimeMillis()
-            if (currentTime - lastTime > 100) { // Check at intervals of 100ms
+            if (currentTime - lastTime > 1000) { // Check at intervals of 100ms
                 val x = event.values[0]
                 val y = event.values[1]
                 val z = event.values[2]

@@ -1,4 +1,3 @@
-
 package com.example.drawing_app
 
 import android.graphics.Bitmap
@@ -38,14 +37,11 @@ import java.io.File
 import androidx.compose.ui.graphics.Color
 import kotlinx.coroutines.withContext
 
-
-
-
 data class Point(val x: Float, val y: Float, val color: Color, val size: Float)
 
 @Composable
 fun DrawingCanvas(navController: NavController, drawingId: Int?, viewModel: DrawingViewModel,
-                  onShakeCallback: (()-> Unit)-> Unit) {
+                  onShakeCallback: (()-> Unit)-> Unit, onSensorEnabledChanged: (Boolean) -> Unit) {
     val context = LocalContext.current
     val scope = rememberCoroutineScope()
     var name by remember { mutableStateOf("") }
@@ -66,6 +62,12 @@ fun DrawingCanvas(navController: NavController, drawingId: Int?, viewModel: Draw
     var sensorEnabled by remember { mutableStateOf(false) }
     // 添加颜色选择的状态
     var selectedColor by remember { mutableStateOf(Color.Red) }
+    var showGravityColorOptions by remember { mutableStateOf(false) }
+
+    fun toggleGravityMode() {
+        sensorEnabled = !sensorEnabled
+        showGravityColorOptions = sensorEnabled
+    }
 
     val sensorEventListener = remember {
         object : SensorEventListener {
@@ -115,7 +117,6 @@ fun DrawingCanvas(navController: NavController, drawingId: Int?, viewModel: Draw
     ) {
         // 使用 Spacer 将内容推到页面底部
         Spacer(modifier = Modifier.weight(1f))
-
         // 颜色选择按钮放在底部
         Row(
             modifier = Modifier
@@ -123,27 +124,45 @@ fun DrawingCanvas(navController: NavController, drawingId: Int?, viewModel: Draw
                 .padding(16.dp),
             horizontalArrangement = Arrangement.SpaceEvenly
         ) {
-            Button(onClick = { selectedColor = Color.Red }) {
-                Text("Red")
-            }
-            Button(onClick = { selectedColor = Color.Blue }) {
-                Text("Blue")
-            }
-            Button(onClick = { selectedColor = Color.Green }) {
-                Text("Green")
-            }
+            // change it
         }
 
         // 启用或禁用传感器绘图的按钮放在颜色选择按钮下方
         Button(
             onClick = {
-                sensorEnabled = !sensorEnabled
+                toggleGravityMode()
             },
             modifier = Modifier
                 .fillMaxWidth()
                 .padding(bottom = 16.dp)  // 添加底部间距
         ) {
             Text(if (sensorEnabled) "Disable Gravity Drawing" else "Enable Gravity Drawing")
+        }
+
+        if (showGravityColorOptions) {
+            Column(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(vertical = 16.dp)
+            ) {
+                Text("Choose Color for Gravity Drawing:")
+                Row(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(16.dp),
+                    horizontalArrangement = Arrangement.SpaceEvenly
+                ) {
+                    Button(onClick = { selectedColor = Color.Red }) {
+                        Text("Red")
+                    }
+                    Button(onClick = { selectedColor = Color.Blue }) {
+                        Text("Blue")
+                    }
+                    Button(onClick = { selectedColor = Color.Green }) {
+                        Text("Green")
+                    }
+                }
+            }
         }
     }
 
@@ -156,6 +175,10 @@ fun DrawingCanvas(navController: NavController, drawingId: Int?, viewModel: Draw
         currentPenSize += 5f
         pencil.size.value = currentPenSize
         Toast.makeText(context, "Pen size increased to $currentPenSize", Toast.LENGTH_SHORT).show()
+    }
+
+    LaunchedEffect(sensorEnabled) {
+        onSensorEnabledChanged(sensorEnabled)
     }
 
     LaunchedEffect(Unit) {
@@ -263,11 +286,25 @@ fun DrawingCanvas(navController: NavController, drawingId: Int?, viewModel: Draw
                 .pointerInput(Unit) {
                     detectDragGestures(
                         onDragStart = { offset ->
-                            currentPath.add(Point(offset.x, offset.y, pencil.color.value, pencil.size.value))
+                            currentPath.add(
+                                Point(
+                                    offset.x,
+                                    offset.y,
+                                    pencil.color.value,
+                                    pencil.size.value
+                                )
+                            )
                         },
                         onDrag = { change, _ ->
                             val point = change.position
-                            currentPath.add(Point(point.x, point.y, pencil.color.value, pencil.size.value))
+                            currentPath.add(
+                                Point(
+                                    point.x,
+                                    point.y,
+                                    pencil.color.value,
+                                    pencil.size.value
+                                )
+                            )
                         }
                     )
                 }

@@ -24,6 +24,8 @@ class MainActivity : AppCompatActivity() {
            Surface {
                NavGraph(navController = navController, viewModel = drawingViewModel, onShakeCallback = {
                    callback -> onShakeCallback = callback
+               }, onSensorEnabledChanged = { enabled ->
+                   toggleShakeListener(enabled)
                })
            }
        }
@@ -40,5 +42,13 @@ class MainActivity : AppCompatActivity() {
 
     private fun onShakeDetected() {
         onShakeCallback?.invoke()
+    }
+
+    private fun toggleShakeListener(sensorEnabled: Boolean) {
+        if (sensorEnabled) {
+            shakeListener.stop()
+        } else {
+            shakeListener.start()
+        }
     }
 }// end of MainActivity implementation
