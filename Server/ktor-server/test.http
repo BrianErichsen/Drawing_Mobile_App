@@ -1,0 +1,23 @@
+### 1. Test Server Health Check
+GET http://localhost:8080/
+
+### 2. Upload an Image
+POST http://localhost:8080/images/upload
+Content-Type: application/json
+
+{
+  "userId": "testUser123",
+  "imageUrl": "http://example.com/test-image.png"
+}
+
+### 3. Fetch Shared Images
+GET http://localhost:8080/images/shared
+
+### 4. Share an Image (Replace [imageId] with actual ID)
+POST http://localhost:8080/images/1/share
+
+### 5. Unshare an Image (Replace [imageId] with actual ID)
+POST http://localhost:8080/images/1/unshare
+
+### 6. Delete an Image (Replace [imageId] with actual ID)
+DELETE http://localhost:8080/images/1
