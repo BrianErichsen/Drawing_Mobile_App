@@ -2,7 +2,6 @@ plugins {
     id("com.android.application")
     id("org.jetbrains.kotlin.android")
     id("com.google.devtools.ksp")
-    //id("androidx.navigation.safeargs")
 }
 
 android {
@@ -88,4 +87,11 @@ dependencies {
     implementation("androidx.compose.material3:material3:1.3.0")
     implementation("androidx.compose.material3:material3-window-size-class:1.3.0")
     implementation("androidx.compose.material3:material3-adaptive-navigation-suite:1.4.0-alpha01")
+
+    // ktor server dependencies
+    implementation("io.ktor:ktor-client-core:3.0.0")
+    implementation("io.ktor:ktor-client-cio:3.0.0")
+    implementation("io.ktor:ktor-client-content-negotiation:3.0.0")
+    implementation("io.ktor:ktor-serialization-kotlinx-json:3.0.0")
+    implementation("io.ktor:ktor-client-resources:3.0.0")
 }
