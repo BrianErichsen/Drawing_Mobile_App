@@ -6,6 +6,7 @@ import androidx.activity.compose.setContent
 import androidx.activity.viewModels
 import androidx.compose.material3.Surface
 import androidx.navigation.compose.rememberNavController
+import com.google.firebase.auth.FirebaseAuth
 
 class MainActivity : AppCompatActivity() {
     private val drawingViewModel: DrawingViewModel by viewModels {
@@ -13,9 +14,11 @@ class MainActivity : AppCompatActivity() {
     }
     private lateinit var shakeListener: ShakeListener
     private var onShakeCallback: (() -> Unit)? = null
+    private lateinit var auth: FirebaseAuth
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+        auth = FirebaseAuth.getInstance()
         shakeListener = ShakeListener(this) {
             onShakeDetected()
         }
