@@ -5,6 +5,7 @@ import androidx.navigation.NavController
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
+import com.example.drawing_app.network.ApiViewModel
 import com.google.firebase.auth.FirebaseAuth
 
 @Composable
@@ -12,7 +13,8 @@ fun NavGraph(
     navController: NavController,
     viewModel: DrawingViewModel,
     onShakeCallback: (() -> Unit) -> Unit,
-    onSensorEnabledChanged: (Boolean) -> Unit
+    onSensorEnabledChanged: (Boolean) -> Unit,
+    apiViewModel: ApiViewModel
 ) {
     // 初始化 FirebaseAuth 实例
     val auth = FirebaseAuth.getInstance()
@@ -31,6 +33,7 @@ fun NavGraph(
                 navController = navController,
                 drawingId = -1,
                 viewModel = viewModel,
+                apiViewModel = apiViewModel,
                 onShakeCallback = onShakeCallback,
                 onSensorEnabledChanged = onSensorEnabledChanged
             )
@@ -42,8 +45,12 @@ fun NavGraph(
                 drawingId = drawingId,
                 viewModel = viewModel,
                 onShakeCallback = onShakeCallback,
-                onSensorEnabledChanged = onSensorEnabledChanged
+                onSensorEnabledChanged = onSensorEnabledChanged,
+                apiViewModel = apiViewModel
             )
+        }
+        composable("shared_drawings") {
+            SharedDrawingsScreen(apiViewModel = apiViewModel)
         }
     }
 }

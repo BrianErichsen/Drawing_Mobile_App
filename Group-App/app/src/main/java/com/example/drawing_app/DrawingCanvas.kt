@@ -35,13 +35,15 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import java.io.File
 import androidx.compose.ui.graphics.Color
+import com.example.drawing_app.network.ApiViewModel
 import kotlinx.coroutines.withContext
 
 data class Point(val x: Float, val y: Float, val color: Color, val size: Float)
 
 @Composable
 fun DrawingCanvas(navController: NavController, drawingId: Int?, viewModel: DrawingViewModel,
-                  onShakeCallback: (()-> Unit)-> Unit, onSensorEnabledChanged: (Boolean) -> Unit) {
+                  onShakeCallback: (()-> Unit)-> Unit, onSensorEnabledChanged: (Boolean) -> Unit,
+                  apiViewModel: ApiViewModel) {
     val context = LocalContext.current
     val scope = rememberCoroutineScope()
     var name by remember { mutableStateOf("") }
@@ -277,6 +279,25 @@ fun DrawingCanvas(navController: NavController, drawingId: Int?, viewModel: Draw
                 Spacer(modifier = Modifier.height(16.dp))
             }
         } // end of if show pen options UI elements
+        // Upload to Server Button
+        Button(
+            onClick = {
+                filePath?.let {
+                    scope.launch {
+                        apiViewModel.uploadImage("testUser123", it) // Replace with actual user ID
+                    }
+                }
+            },
+            modifier = Modifier.fillMaxWidth()
+        ) {
+            Text("Upload Drawing")
+        }
+
+        // Go to Shared Drawings
+        Button(onClick = { navController.navigate("shared_drawings") }) {
+            Text("View Shared Drawings")
+        }
+        // ----
         // Drawing area
         Canvas(
             modifier = Modifier
