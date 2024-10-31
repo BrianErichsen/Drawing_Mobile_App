@@ -8,6 +8,7 @@ import android.hardware.SensorEventListener
 import android.hardware.SensorManager
 import android.graphics.BitmapFactory
 import android.graphics.Paint
+import android.util.Log
 import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.ui.graphics.Path
 import androidx.compose.ui.graphics.drawscope.Stroke
@@ -36,6 +37,7 @@ import kotlinx.coroutines.launch
 import java.io.File
 import androidx.compose.ui.graphics.Color
 import com.example.drawing_app.network.ApiViewModel
+import com.google.firebase.auth.FirebaseAuth
 import kotlinx.coroutines.withContext
 
 data class Point(val x: Float, val y: Float, val color: Color, val size: Float)
@@ -283,9 +285,12 @@ fun DrawingCanvas(navController: NavController, drawingId: Int?, viewModel: Draw
         Button(
             onClick = {
                 filePath?.let {
-                    scope.launch {
-                        apiViewModel.uploadImage("testUser123", it) // Replace with actual user ID
-                    }
+                    val bitmap = BitmapFactory.decodeFile(it)
+                    val userId = FirebaseAuth.getInstance().currentUser?.uid ?: "unknown_user"
+                    apiViewModel.uploadImage(bitmap, userId, onSuccess = {
+                        Log.d("DrawingCanvas", it)
+                        apiViewModel.fetchSharedImages(userId)}, onError = { Log.e("DrawingCanvas", it) })
+                    navController.navigate("shared_drawings")
                 }
             },
             modifier = Modifier.fillMaxWidth()

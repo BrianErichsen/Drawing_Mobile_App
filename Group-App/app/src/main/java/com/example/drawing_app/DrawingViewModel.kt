@@ -74,9 +74,5 @@ class DrawingViewModel(private val repository: DrawingRepository) : ViewModel() 
         _sensorPath.postValue(updatedPath)
     }
 }
-
-
-
-
 // end of ViewModel Implementation
 

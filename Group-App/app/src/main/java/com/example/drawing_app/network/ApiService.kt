@@ -36,15 +36,20 @@ class ApiService {
         install(Resources)
     }
 
-    suspend fun uploadImage(request: ImageUploadRequest): DrawingResponse {
-        return httpClient.post("$URL_BASE/images/upload") {
+    suspend fun uploadImage(userId: String, imageUrl: String): String {
+        val response = httpClient.post("$URL_BASE/images/upload") {
             contentType(ContentType.Application.Json)
-            setBody(request)
-        }.body()
+            setBody(ImageUploadRequest(userId, imageUrl))
+        }
+        return response.body<String>()
     }
 
-    suspend fun fetchSharedImages(): List<DrawingResponse> {
-        return httpClient.get("$URL_BASE/images/shared").body()
+    suspend fun fetchSharedImages(userId: String): List<DrawingResponse> {
+        return httpClient.get("$URL_BASE/images/shared") {
+            if (userId != null) {
+                parameter("userId", userId)
+            }
+        }.body()
     }
 
     suspend fun shareImage(imageId: Int) {

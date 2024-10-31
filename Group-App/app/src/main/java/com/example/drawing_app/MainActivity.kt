@@ -21,6 +21,8 @@ class MainActivity : AppCompatActivity() {
     private val apiViewModel: ApiViewModel by viewModels {
         ApiViewModelFactory(ApiRepository(CoroutineScope(Dispatchers.IO), ApiService()))
     }
+
+
     private lateinit var shakeListener: ShakeListener
     private var onShakeCallback: (() -> Unit)? = null
     private lateinit var auth: FirebaseAuth
@@ -34,7 +36,9 @@ class MainActivity : AppCompatActivity() {
        setContent {
            val navController = rememberNavController()
            Surface {
-               NavGraph(navController = navController, viewModel = drawingViewModel, apiViewModel = apiViewModel,
+               NavGraph(navController = navController,
+                   viewModel = drawingViewModel,
+                   apiViewModel = apiViewModel,
                    onShakeCallback = {
                    callback -> onShakeCallback = callback
                }, onSensorEnabledChanged = { enabled ->

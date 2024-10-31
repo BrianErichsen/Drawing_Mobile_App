@@ -16,6 +16,7 @@ import androidx.compose.ui.Alignment
 
 @Composable
 fun MainPage(navController: NavController, viewModel: DrawingViewModel) {
+    val drawings by viewModel.drawingList.collectAsState(initial = emptyList())
     Column(
         modifier = Modifier
             .fillMaxSize()
@@ -30,7 +31,31 @@ fun MainPage(navController: NavController, viewModel: DrawingViewModel) {
             Text("Create New Drawing")
         }
     }
+    if (drawings.isNotEmpty()) {
+        Text("Edit Drawing", modifier = Modifier.padding(8.dp))
+
+        LazyColumn(
+            modifier = Modifier.fillMaxHeight(),
+            contentPadding = PaddingValues(vertical = 10.dp)
+        ) {
+            items(drawings) { drawing ->
+                Button(
+                    onClick = {
+                        navController.navigate("edit_drawing/${drawing.id}")
+                    },
+                    modifier = Modifier
+                        .padding(5.dp)
+                        .fillMaxWidth()
+                ) {
+                    Text(drawing.name)
+                }
+            }
+        }
+    } else {
+        Text("Sorry but no drawings available", modifier = Modifier.padding(7.dp))
+    }
 }
+
 
 @Composable
 fun LoginScreen(navController: NavController, viewModel: DrawingViewModel) {
@@ -65,7 +90,7 @@ fun LoginScreen(navController: NavController, viewModel: DrawingViewModel) {
 
         // Register and Login Buttons
         Button(
-            onClick = { registerUser(auth, email, password) { message = "Registration successful" } },
+            onClick = { registerUser(auth, email, password, navController) { message = "Registration successful" } },
             modifier = Modifier.fillMaxWidth()
         ) {
             Text("Register")
@@ -120,11 +145,12 @@ fun LoginScreen(navController: NavController, viewModel: DrawingViewModel) {
 }
 
 // Helper functions for registering and logging in users
-private fun registerUser(auth: FirebaseAuth, email: String, password: String, onSuccess: () -> Unit) {
+private fun registerUser(auth: FirebaseAuth, email: String, password: String, navController: NavController, onSuccess: () -> Unit) {
     auth.createUserWithEmailAndPassword(email, password)
         .addOnCompleteListener { task ->
             if (task.isSuccessful) {
-                onSuccess()
+                onSuccess() // 调用 onSuccess 回调来更新消息或其他处理
+                navController.navigate("main_page")
             } else {
                 // Handle registration failure, for example, by displaying a message
             }
