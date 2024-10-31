@@ -111,13 +111,9 @@ fun Application.configureRouting() {
         // Fetch Shared Images Endpoint
         get("/images/shared") {
             val baseUrl = call.request.origin.scheme + "://" + call.request.host() + ":" + call.request.port()
-            val userId = call.request.queryParameters["userId"]
             val sharedImages = transaction {
-                Drawings.join(Users, JoinType.INNER, additionalConstraint = { Drawings.userId eq Users.id })
-                    .select {
-                        (Drawings.shared eq true) and
-                                (if (userId != null) Drawings.userId eq userId else Op.TRUE) // Filter by userId if provided
-                    }
+                Drawings.join(Users, JoinType.INNER, additionalConstraint = { Drawings.userId eq Users.id})
+                    .select { Drawings.shared eq true }
                     .map {
                         ImageResponse(
                             id = it[Drawings.id].value,
@@ -176,4 +172,4 @@ fun Application.configureRouting() {
             }
         }
     }
-}
+} //
