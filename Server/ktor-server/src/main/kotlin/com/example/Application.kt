@@ -30,6 +30,7 @@ fun main() {
 
 fun Application.module() {
     DBSettings.init()
+    configureDatabaseDefaults()
     configureSerialization()
     configureRouting()
 }

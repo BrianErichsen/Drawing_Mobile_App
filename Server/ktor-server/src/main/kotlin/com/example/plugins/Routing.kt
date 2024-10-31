@@ -24,16 +24,23 @@ import org.jetbrains.exposed.sql.transactions.transaction
 import java.io.File
 import java.io.InputStream
 
-
-@Serializable
-data class ImageUploadRequest(val userId: String, val imageUrl: String)
-
 @Serializable
 data class ImageResponse(val id: Int, val userId: String , val imageUrl: String, val shared: Boolean)
 
+fun Application.configureDatabaseDefaults() {
+    transaction {
+        if (Users.select { Users.id eq "guest_user" }.empty()) {
+            Users.insert {
+                it[id] = "guest_user"
+                it[email] = "guest@example.com" // Placeholder email for guest user
+            }
+        }
+    }
+}
+
 fun Application.configureRouting() {
     install(Resources)
-    val logger = KotlinLogging.logger {}
+
     // Set up a directory for storing uploaded images if not using a URL path
     val uploadDir = File("uploads")
     if (!uploadDir.exists()) {
@@ -55,26 +62,40 @@ fun Application.configureRouting() {
             val multipart = call.receiveMultipart()
             var userId: String? = null
             var imageUrl: String? = null
+            var imageId: Int? = null
 
             multipart.forEachPart { part ->
                 when (part) {
                     is PartData.FormItem -> {
-                        logger.debug("Received FormItem: ${part.name} = ${part.value}")
                         if (part.name == "userId") {
                             userId = part.value
                         }
                     }
                     is PartData.FileItem -> {
-                        logger.debug("Received FileItem: ${part.name}, filename: ${part.originalFileName}")
                         if (part.name == "file") {
-                            val fileName = part.originalFileName ?: "uploaded_image.png"
+                            val finalUserId = userId ?: "guest_user"
+                            transaction {
+                                imageId = Drawings.insertAndGetId {
+                                    it[Drawings.userId] = finalUserId
+                                    it[Drawings.imageUrl] = "" // Temporary placeholder
+                                    it[Drawings.shared] = true
+                                }.value
+                            }
+
+                            val fileName = "${imageId}.png"
                             val file = File(uploadDir, fileName)
                             file.outputStream().buffered().use { output ->
                                 (part.provider() as? InputStream)?.use { input ->
                                     input.copyTo(output)
                                 }
                             }
+
                             imageUrl = "/uploads/$fileName"
+                            transaction {
+                                Drawings.update( { Drawings.id eq imageId!! }) {
+                                    it[Drawings.imageUrl] = imageUrl!!
+                                }
+                            }
                         }
                     }
                     else -> {}
@@ -88,24 +109,23 @@ fun Application.configureRouting() {
                 return@post
             }
 
-            var imageId: Int? = null
 
-            transaction {
-                // Insert user if not exists
-                Users.insertIgnore {
-                    it[id] = userId!!
-                    it[email] = "example_user@gmail.com" // Placeholder email
-                }
+//
+//                // Insert image with user ID as a direct reference
+//                imageId = Drawings.insertAndGetId {
+//                    it[Drawings.userId] = userId!!
+//                    it[Drawings.imageUrl] = imageUrl!!
+//                    it[Drawings.shared] = true
+//                }.value
+//            }
 
-                // Insert image with user ID as a direct reference
-                imageId = Drawings.insertAndGetId {
-                    it[Drawings.userId] = userId!!
-                    it[Drawings.imageUrl] = imageUrl!!
-                    it[Drawings.shared] = true
-                }.value
+            // Ensure userId and imageUrl are not null
+            if (userId == null || imageUrl == null) {
+                call.respond(HttpStatusCode.BadRequest, "Missing userId or file")
+            } else {
+                call.respond(HttpStatusCode.Created, "Image uploaded with ID: $imageId")
             }
-
-            call.respond(HttpStatusCode.Created, "Image uploaded with ID: $imageId")
+            //call.respond(HttpStatusCode.Created, "Image uploaded with ID: $imageId")
         }
 
         // Fetch Shared Images Endpoint
